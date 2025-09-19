@@ -1,0 +1,35 @@
+# Django and API
+Django
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+
+# Database and Cache
+psycopg2-binary
+redis
+django-redis
+
+# Background Tasks
+celery
+kombu
+
+# Environment and Config
+python-decouple
+dj-database-url
+
+# Authentication
+django-allauth
+requests
+cryptography
+
+# Testing and Quality
+pytest
+pytest-django
+coverage
+
+# Monitoring
+sentry-sdk
+
+# Development
+django-extensions
+ipython
