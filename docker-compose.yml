@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database - Stores all our tickets, users, etc.
+  postgres:
+    image: postgres:15
+    container_name: ticket_postgres
+    environment:
+      POSTGRES_DB: ticket_system
+      POSTGRES_USER: ticket_user
+      POSTGRES_PASSWORD: ticket_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ticket_user -d ticket_system"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    
+  redis:
+    image: redis:7-alpine
+    container_name: ticket_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ticket_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ticket_user
+      RABBITMQ_DEFAULT_PASS: ticket_pass
+    ports:
+      - "5672:5672"      # AMQP port
+      - "15672:15672"    # Management UI
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  django:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ticket_django
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://ticket_user:ticket_pass@postgres:5432/ticket_system
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=amqp://ticket_user:ticket_pass@rabbitmq:5672//
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: python manage.py runserver 0.0.0.0:8000
+  
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ticket_celery
+    environment:
+      - DATABASE_URL=postgresql://ticket_user:ticket_pass@postgres:5432/ticket_system
+      - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=amqp://ticket_user:ticket_pass@rabbitmq:5672//
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+    command: celery -A ticket_system worker --loglevel=info
+
+volumes:
+  postgres_data: 
