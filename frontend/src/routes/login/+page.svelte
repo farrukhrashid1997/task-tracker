@@ -23,7 +23,6 @@
 		} else {
 			errorMessage = result.error || 'Login failed';
 		}
-
 	}
 </script>
 
@@ -62,10 +61,14 @@
 								required
 							/>
 							<div style="margin-bottom: 1rem;">
-								<CustomButton type="submit" size="field" variant="default">{loading ? 'Signing In...' : 'Sign In'}</CustomButton>
+								<CustomButton type="submit" size="field" variant="default"
+									>{loading ? 'Signing In...' : 'Sign In'}</CustomButton
+								>
 							</div>
 
-							<CustomButton type="submit" variant="secondary" size="field">Register</CustomButton>
+							<CustomButton variant="secondary" on:click={() => goto('/register')} size="field"
+								>Register</CustomButton
+							>
 						</form>
 					</Tile>
 				</div>
@@ -94,7 +97,7 @@
 		margin-bottom: 2rem;
 	}
 
-    .error-message {
+	.error-message {
 		background: #da1e28;
 		color: white;
 		padding: 0.75rem;

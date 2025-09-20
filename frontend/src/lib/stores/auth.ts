@@ -58,3 +58,25 @@ export async function logout(): Promise<void> {
 	}
 }
 
+
+export async function register(
+	username: string, 
+	email: string, 
+	password: string, 
+	firstName: string, 
+	lastName: string, 
+	role: string
+): Promise<{ success: boolean; error?: string }> {
+	try {
+		const { registerUser } = await import('../api/auth');
+		
+		const response = await registerUser(username, email, password, firstName, lastName, role);
+		user.set(response.user);
+		isAuthenticated.set(true);
+		
+		return { success: true };
+		
+	} catch (error) {
+		return { success: false, error: (error as Error).message };
+	}
+}
