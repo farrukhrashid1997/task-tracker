@@ -3,22 +3,30 @@
 	// @ts-ignore
 	import { goto } from '$app/navigation';
 	import CustomButton from '../../lib/components/CustomButton.svelte';
+	// @ts-ignore
+	import { login } from '$lib/stores/auth';
 
-	let email = '';
+	let username = '';
 	let password = '';
+	let loading = false;
+	let errorMessage = '';
 
-	function handleLogin() {
-		// Simple true/false auth for now
-		if (email && password) {
-			// For now, just redirect to dashboard
+	async function handleLogin() {
+		if (!username || !password) {
+			errorMessage = 'Please enter username and password';
+			return;
+		}
+
+		const result = await login(username, password);
+		if (result.success) {
 			goto('/');
 		} else {
-			alert('Please enter email and password');
+			errorMessage = result.error || 'Login failed';
 		}
+
 	}
 </script>
 
-<!-- Mobile-first container -->
 <div class="login-container">
 	<Grid>
 		<Row>
@@ -30,12 +38,17 @@
 							<h1>Task Tracker</h1>
 							<p>Sign in to your account</p>
 						</div>
+						{#if errorMessage}
+							<div class="error-message">
+								{errorMessage}
+							</div>
+						{/if}
 						<form on:submit|preventDefault={handleLogin}>
 							<TextInput
-								bind:value={email}
-								labelText="Email"
-								placeholder="Enter your email"
-								type="email"
+								bind:value={username}
+								labelText="Username"
+								placeholder="Enter your username"
+								type="text"
 								style="margin-bottom: 1rem;"
 								required
 							/>
@@ -49,7 +62,7 @@
 								required
 							/>
 							<div style="margin-bottom: 1rem;">
-								<CustomButton type="submit" size="field" variant="default">Sign In</CustomButton>
+								<CustomButton type="submit" size="field" variant="default">{loading ? 'Signing In...' : 'Sign In'}</CustomButton>
 							</div>
 
 							<CustomButton type="submit" variant="secondary" size="field">Register</CustomButton>
@@ -79,6 +92,15 @@
 	.login-header {
 		text-align: center;
 		margin-bottom: 2rem;
+	}
+
+    .error-message {
+		background: #da1e28;
+		color: white;
+		padding: 0.75rem;
+		border-radius: 4px;
+		margin-bottom: 1rem;
+		text-align: center;
 	}
 
 	.login-header h1 {

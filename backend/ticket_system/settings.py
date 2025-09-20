@@ -128,7 +128,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Django Rest Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'accounts.authentication.CookieJWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -145,9 +145,9 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
 }
 
-# CORS Settings (for Svelte frontend)
+CORS_ALLOW_CREDENTIALS = True  
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",  # Svelte dev server
+    "http://localhost:5173",
     "http://127.0.0.1:5173",
 ]
 

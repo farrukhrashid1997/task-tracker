@@ -33,7 +33,9 @@
 		"vite": "^7.0.4"
 	},
 	"dependencies": {
+		"@types/js-cookie": "^3.0.6",
 		"carbon-components-svelte": "^0.89.7",
-		"carbon-icons-svelte": "^13.5.0"
+		"carbon-icons-svelte": "^13.5.0",
+		"js-cookie": "^3.0.5"
 	}
 }
