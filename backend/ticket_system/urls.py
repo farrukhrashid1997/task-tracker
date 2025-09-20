@@ -9,7 +9,7 @@ from django.core.cache import cache
 import json
 
 
-def health_check(request):
+def health_check():
     status = {
         "status": "OK", 
         "services": {}, 
