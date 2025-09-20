@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework import status, permissions
@@ -11,6 +12,7 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 import requests
 from .models import UserProfile
+from django.http import JsonResponse
 
 
 
@@ -36,28 +38,46 @@ def login(request):
     
     user = authenticate(username=username, password=password)
     
-    
-    if user is not None:
-        if user.is_active:
-            tokens = get_tokens_for_user(user)
-            return Response({
-                'message': 'Login Successful', 
-                "tokens": tokens, 
-                "user": {
-                    'username': user.username, 
-                    'email': user.email,
-                    "first_name": user.first_name,
-                    "last_name": user.last_name,
-                    "role": user.profile.role,
-                    
-                }
-            })
+    if user is not None and user.is_active:
+        tokens = get_tokens_for_user(user)
+        
+        # Create response with user data (NO TOKENS in body)
+        response_data = {
+            'message': 'Login Successful',
+            'user': {
+                'id': user.id,  # Add ID here
+                'username': user.username, 
+                'email': user.email,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "role": user.profile.role,
+            }
+        }
+        
+        response = JsonResponse(response_data)
+        
+        response.set_cookie(
+            'access_token',
+            tokens['access'],
+            max_age=60 * 60,
+            httponly=True, 
+            samesite='Strict'
+        )
+        
+        response.set_cookie(
+            'refresh_token',
+            tokens['refresh'],
+            max_age=60 * 60 * 24 * 7,  # 7 days
+            httponly=True,
+            samesite='Strict'
+        )
+        
+        return response
     
     else: 
         return Response({
             'error': "Invalid username or password"
         }, status=status.HTTP_401_UNAUTHORIZED)
-    
     
 
 @api_view(['POST'])
@@ -210,6 +230,15 @@ def google_auth_view(request):
             'error': f'Google authentication failed: {str(e)}'
         }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def logout():
+    response = JsonResponse({'message': 'Logged out successfully'})
+    response.delete_cookie('access_token')
+    response.delete_cookie('refresh_token')
+    
+    return response
         
 @api_view(['GET'])
 def status_view(request):
