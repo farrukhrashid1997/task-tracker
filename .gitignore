@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+
 lib64/
 parts/
 sdist/
@@ -25,6 +25,9 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+./frontend/svelte-kit/
+.svelte-kit/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -207,3 +210,7 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 backend/cypienta-venv/
+
+
+
+node_modules/
