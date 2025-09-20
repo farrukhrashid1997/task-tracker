@@ -122,11 +122,8 @@ def register_user(request):
         user.profile.save()
         
         tokens = get_tokens_for_user(user)
-        
-        
-        return Response({
+        response_data = {
             'message': 'User registered successfully',
-            'tokens': tokens,
             'user': {
                 'id': user.id,
                 'username': user.username,
@@ -135,7 +132,29 @@ def register_user(request):
                 'last_name': user.last_name,
                 'role': user.profile.role,
             }
-        }, status=status.HTTP_201_CREATED)
+        }
+        
+        response = JsonResponse(response_data, status=201)
+
+        
+        
+        response.set_cookie(
+            'access_token',
+            tokens['access'],
+            max_age=60 * 60,
+            httponly=True, 
+            samesite='Strict'
+        )
+        
+        response.set_cookie(
+            'refresh_token',
+            tokens['refresh'],
+            max_age=60 * 60 * 24 * 7,
+            httponly=True,
+            samesite='Strict'
+        )
+        
+        return response
     
     except Exception as e:
         return Response({
