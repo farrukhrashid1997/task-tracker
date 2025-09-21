@@ -4,7 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { logout } from '$lib/stores/auth';
 
-	// Navigation items
+	$: currentPath = $page.url.pathname;
+
 	const navItems = [
 		{
 			path: '/',
@@ -24,8 +25,6 @@
 		logout();
 		goto('/login');
 	}
-
-	$: currentPath = $page.url.pathname;
 </script>
 
 <aside class="sidebar">
@@ -58,13 +57,8 @@
 		width: 250px;
 		height: 100vh;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		position: fixed;
-		left: 0;
-		top: 0;
 		display: flex;
 		flex-direction: column;
-		box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 		z-index: 1000;
 	}
 
@@ -88,11 +82,6 @@
 		padding: 1rem 0;
 	}
 
-	.sidebar-nav ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
 
 	.sidebar-nav li {
 		margin: 0.5rem 0;
@@ -161,16 +150,6 @@
 		margin-right: 0.75rem;
 	}
 
-	/* Mobile responsiveness */
 	@media (max-width: 768px) {
-		.sidebar {
-			width: 200px;
-			transform: translateX(-100%);
-			transition: transform 0.3s ease;
-		}
-
-		.sidebar.mobile-open {
-			transform: translateX(0);
-		}
 	}
 </style>
