@@ -30,19 +30,19 @@ A full-stack ticket management application built with Svelte frontend and Django
 2. **Start Backend Services**
    ```bash
    # Start all backend services (PostgreSQL, Redis, RabbitMQ, Django, Celery)
-   docker-compose up --build
+   docker compose up --build
    ```
 
 3. **Run Database Setup**
    ```bash
    # Run migrations to create database tables
-   docker-compose exec django python manage.py migrate
+   docker compose exec django python manage.py migrate
    ```
 
 4. **Load Sample Data (Optional)**
    ```bash
    # Load test data for development
-   docker-compose exec django python manage.py create_sample_data
+   docker compose exec django python manage.py create_sample_data
    ```
 
 5. **Start Frontend Development Server**
