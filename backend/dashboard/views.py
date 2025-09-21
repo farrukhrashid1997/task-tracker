@@ -8,7 +8,7 @@ from tickets.models import Ticket
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def ticket_status_stats():
+def ticket_status_stats(request):
     status_stats = Ticket.objects.values('status').annotate(count=Count('status'))
     data = {}
     for stat in status_stats:
@@ -36,6 +36,11 @@ def ticket_priority_stats(request):
     result = {}
     for priority in all_priorities:
         result[priority] = data.get(priority, 0)
+    
+    return Response({
+        'priority_distribution': result, 
+        'total_tickets': sum(result.values())
+    })
     
 
 @api_view(['GET'])

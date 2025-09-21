@@ -24,7 +24,7 @@ export interface Comment {
   user: number;
   content: string;
   created_at: string;
-  user_details?: User;
+  author?: User;
 }
 
 export interface Ticket {

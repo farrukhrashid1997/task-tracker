@@ -22,15 +22,15 @@
 	let error = '';
 
 	const priorityItems = [
-		{ id: 'Low', text: 'Low Priority' },
-		{ id: 'Medium', text: 'Medium Priority' },
-		{ id: 'High', text: 'High Priority' }
+		{ id: 'low', text: 'Low Priority' },
+		{ id: 'medium', text: 'Medium Priority' },
+		{ id: 'high', text: 'High Priority' }
 	];
 
 	const statusItems = [
-		{ id: 'Open', text: 'Open' },
-		{ id: 'In Progress', text: 'In Progress' },
-		{ id: 'Closed', text: 'Closed' }
+		{ id: 'open', text: 'Open' },
+		{ id: 'in_progress', text: 'In Progress' },
+		{ id: 'closed', text: 'Closed' }
 	];
 
 	$: assigneeItems = [
