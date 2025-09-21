@@ -9,10 +9,10 @@
 	}
 
 	let sidebarOpen = $state(false);
-  let currentPath = $state($page.url.pathname);
-  
-  let showSidebar = $derived(!['/login', '/register'].includes(currentPath));
-  let { children }: Props = $props();
+	let currentPath = $state($page.url.pathname);
+
+	let showSidebar = $derived(!['/login', '/register'].includes(currentPath));
+	let { children }: Props = $props();
 
 	function toggleSidebar() {
 		sidebarOpen = !sidebarOpen;
@@ -27,9 +27,11 @@
 
 {#if showSidebar}
 	<div class="layout-container">
-		<button class="mobile-menu-btn" onclick={toggleSidebar} aria-label="Toggle menu">
-			<Menu size={20} />
-		</button>
+		{#if !sidebarOpen}
+			<button class="mobile-menu-btn" onclick={toggleSidebar} aria-label="Toggle menu">
+				<Menu size={20} />
+			</button>
+		{/if}
 
 		<div class="sidebar-wrapper" class:mobile-open={sidebarOpen}>
 			<Sidebar />
@@ -100,7 +102,6 @@
 		transform: translateY(-2px);
 		box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 	}
-
 
 	.mobile-overlay {
 		position: fixed;

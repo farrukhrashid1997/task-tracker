@@ -150,6 +150,8 @@
 		margin-right: 0.75rem;
 	}
 
+	/* Mobile responsiveness */
 	@media (max-width: 768px) {
+
 	}
 </style>

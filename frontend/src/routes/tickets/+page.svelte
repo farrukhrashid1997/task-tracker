@@ -2,8 +2,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { Button } from 'carbon-components-svelte';
-	import { Add } from 'carbon-icons-svelte';
 
 	import {
 		getTickets,
@@ -15,6 +13,7 @@
 	} from '$lib/api/tickets';
 	import TicketCard from '$lib/components/TicketCard.svelte';
 	import CreateTicketModal from '$lib/components/CreateTicketModal.svelte';
+	import CustomButton from '$lib/components/CustomButton.svelte';
 
 	let tickets: Ticket[] = [];
 	let users: User[] = [];
@@ -26,10 +25,6 @@
 		const respUsers = await getUsers();
 		users = respUsers.results;
 	});
-
-	function handleCreateTicket(): void {
-		showCreateModal = !showCreateModal;
-	}
 
 	function handleViewTicket(ticket: Ticket): void {
 		goto(`/tickets/${ticket.id}`);
@@ -61,7 +56,15 @@
 <div class="tickets-page">
 	<div class="header">
 		<h1>Tickets</h1>
-		<Button kind="primary" icon={Add} on:click={handleCreateTicket} style={"border-radius: 1rem; max-width: 200px"}>Create Ticket</Button>
+		<div>
+			<CustomButton
+				type="button"
+				variant="default"
+				on:click={() => {
+					showCreateModal = true;
+				}}>Create Ticket</CustomButton
+			>
+		</div>
 	</div>
 
 	<div class="tickets-list">

@@ -51,7 +51,6 @@
 		error = '';
 	}
 
-	// BUG: Modal doesnt close and refresh once you hit create
 	function handleClose(): void {
 		open = false;
 		resetForm();
@@ -80,9 +79,9 @@
 			creating = false;
 		}
 	}
-
 	$: isValid = title.trim() && description.trim();
 	$: primaryButtonText = creating ? '' : 'Create Ticket';
+
 </script>
 
 <Modal
@@ -96,7 +95,6 @@
 	class="ticket-modal"
 >
 	<div class="form-container">
-		<!-- Title Section -->
 		<div class="form-section">
 			<TextInput
 				labelText="Title"
@@ -143,7 +141,6 @@
 			</div>
 		</div>
 
-		<!-- Assignment Section -->
 		<div class="form-section">
 			<Dropdown
 				titleText="Assign To Team Member"
@@ -154,7 +151,6 @@
 			/>
 		</div>
 
-		<!-- Loading and Error States -->
 		{#if error}
 			<div class="status-indicator error">
 				<div class="error-message">
@@ -209,59 +205,7 @@
 	}
 
 	/* Custom Footer */
-	.custom-footer {
-		display: flex;
-		justify-content: center;
-		padding: 2rem;
-		width: 100%;
-		border-top: 1px solid #e0e0e0;
-		background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-		margin: 0 -2rem -1.5rem -2rem;
-	}
-
-	.button-content {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		z-index: 2;
-	}
-
-	.btn-icon {
-		transition: transform 0.2s ease;
-	}
-	.btn-text {
-		display: flex;
-		align-items: center;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-	}
-
-	/* Shine Effect */
-	.btn-shine {
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-		transition: left 0.6s ease;
-	}
-
-	:global(.create-btn:hover:not(:disabled)) .btn-shine {
-		left: 100%;
-	}
-
-	/* Loading Spinner */
-	.spinner {
-		width: 18px;
-		height: 18px;
-		border: 2px solid rgba(255, 255, 255, 0.3);
-		border-top: 2px solid #ffffff;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
+	
 
 	@keyframes spin {
 		0% {
@@ -279,11 +223,6 @@
 		margin: 0.5rem 0;
 	}
 
-	.status-indicator.loading {
-		background: #f0f7ff;
-		border: 1px solid #d0e2ff;
-		text-align: center;
-	}
 
 	.status-indicator.error {
 		background: #fff1f1;
