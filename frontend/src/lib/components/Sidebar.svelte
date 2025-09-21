@@ -2,21 +2,21 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { isAuthenticated, logout } from '$lib/stores/auth';
-	
+	import { logout } from '$lib/stores/auth';
+
 	// Navigation items
 	const navItems = [
 		{
 			path: '/',
-			label: 'Dashboard',
+			label: 'Dashboard'
 		},
 		{
 			path: '/tickets',
-			label: 'Tickets',
+			label: 'Tickets'
 		},
 		{
 			path: '/profile',
-			label: 'Profile',
+			label: 'Profile'
 		}
 	];
 
@@ -32,24 +32,19 @@
 	<div class="sidebar-header">
 		<h2>TicketFlow</h2>
 	</div>
-	
+
 	<nav class="sidebar-nav">
 		<ul>
 			{#each navItems as item}
 				<li>
-					<a 
-						href={item.path}
-						class="nav-link"
-						class:active={currentPath === item.path}
-					>
-						<span class="nav-icon">{item.icon}</span>
+					<a href={item.path} class="nav-link" class:active={currentPath === item.path}>
 						<span class="nav-label">{item.label}</span>
 					</a>
 				</li>
 			{/each}
 		</ul>
 	</nav>
-	
+
 	<div class="sidebar-footer">
 		<button class="logout-btn" on:click={handleLogout}>
 			<span class="nav-icon">🚪</span>

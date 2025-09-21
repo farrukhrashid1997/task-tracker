@@ -252,11 +252,10 @@ def google_auth_view(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def logout():
+def logout(request):
     response = JsonResponse({'message': 'Logged out successfully'})
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
-    
     return response
         
 @api_view(['GET'])
