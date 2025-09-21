@@ -61,7 +61,7 @@
 <div class="tickets-page">
 	<div class="header">
 		<h1>Tickets</h1>
-		<Button kind="primary" icon={Add} on:click={handleCreateTicket}>Create Ticket</Button>
+		<Button kind="primary" icon={Add} on:click={handleCreateTicket} style={"border-radius: 1rem; max-width: 200px"}>Create Ticket</Button>
 	</div>
 
 	<div class="tickets-list">

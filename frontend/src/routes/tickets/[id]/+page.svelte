@@ -64,7 +64,12 @@
 	<div class="header">
 		<Button kind="ghost" icon={ArrowLeft} on:click={goBack}>Back to Tickets</Button>
 		{#if ticket}
-			<Button kind="primary" icon={Edit} on:click={goToEdit}>Edit Ticket</Button>
+			<Button
+				kind="primary"
+				icon={Edit}
+				on:click={goToEdit}
+				style="border-radius: 1rem; max-width: 200px">Edit Ticket</Button
+			>
 		{/if}
 	</div>
 
@@ -123,7 +128,7 @@
 				{#each ticket.comments || [] as comment}
 					<div class="comment">
 						<div class="comment-header">
-							<strong>{comment.author.first_name} {comment.author.last_name}</strong>
+							<strong>{comment?.author?.first_name} {comment?.author?.last_name}</strong>
 							<span class="comment-date">{formatDate(comment.created_at)}</span>
 						</div>
 						<p class="comment-content">{comment.content}</p>
