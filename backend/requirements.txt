@@ -36,3 +36,6 @@ google-auth
 google-auth-oauthlib
 google-auth-httplib2
 requests
+pytest-django
+pytest-cov 
+coverage

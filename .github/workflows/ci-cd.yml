@@ -17,3 +17,9 @@ jobs:
     
     - name: Build Docker images
       run: docker compose build
+    
+    - name: Run tests
+      run: |
+        docker compose up -d
+        docker compose exec django pytest -v
+        docker compose down
