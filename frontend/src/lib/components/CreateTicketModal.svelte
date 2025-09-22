@@ -1,4 +1,4 @@
-<!-- frontend/src/lib/components/CreateTicketModal.svelte -->
+<!-- Simplified CreateTicketModal.svelte -->
 <script lang="ts">
 	import {
 		Modal,
@@ -7,18 +7,23 @@
 		Dropdown,
 	} from 'carbon-components-svelte';
 
-	import { createTicket, type User, type CreateTicketData } from '$lib/api/tickets';
+	import type { User, CreateTicketData, Ticket } from '$lib/api/tickets';
 
 	export let open = false;
 	export let users: User[] = [];
-	export let onTicketCreated: () => void = () => {};
+	export let modalHeading = 'Create New Ticket';
+	export let primaryButtonText = 'Create Ticket';
+	export let onSubmit: (data: CreateTicketData) => Promise<void>;
+	export let onClose: () => void = () => {};
+	
+	export let initialData: Partial<Ticket> | null = null;
 
 	let title = '';
 	let description = '';
-	let priority = 'Medium';
-	let status = 'Open';
+	let priority = 'medium';
+	let status = 'open';
 	let assignedTo = 'unassigned';
-	let creating = false;
+	let submitting = false;
 	let error = '';
 
 	const priorityItems = [
@@ -41,26 +46,34 @@
 		}))
 	];
 
+	// Pre-fill form when initialData changes
+	$: if (initialData && open) {
+		title = initialData.title || '';
+		description = initialData.description || '';
+		priority = initialData.priority || 'medium';
+		status = initialData.status || 'open';
+		assignedTo = initialData.assigned_to?.id ? initialData.assigned_to.id.toString() : 'unassigned';
+	}
+
 	function resetForm(): void {
 		title = '';
 		description = '';
-		priority = 'Medium';
-		status = 'Open';
+		priority = 'medium';
+		status = 'open';
 		assignedTo = 'unassigned';
-		creating = false;
+		submitting = false;
 		error = '';
 	}
 
-	// BUG: Modal doesnt close and refresh once you hit create
 	function handleClose(): void {
-		open = false;
 		resetForm();
+		onClose();
 	}
 
 	async function handleSubmit(): Promise<void> {
 		if (!title.trim() || !description.trim()) return;
 
-		creating = true;
+		submitting = true;
 		error = '';
 
 		try {
@@ -72,31 +85,29 @@
 				assigned_to_id: assignedTo !== 'unassigned' ? parseInt(assignedTo) : null
 			};
 
-			await createTicket(ticketData);
+			await onSubmit(ticketData);
 			handleClose();
-			onTicketCreated();
 		} catch (err) {
-			error = 'Failed to create ticket. Please try again.';
-			creating = false;
+			error = 'Failed to save ticket. Please try again.';
+			submitting = false;
 		}
 	}
 
 	$: isValid = title.trim() && description.trim();
-	$: primaryButtonText = creating ? '' : 'Create Ticket';
+	$: buttonText = submitting ? '' : primaryButtonText;
 </script>
 
 <Modal
 	bind:open
-	modalHeading="Create New Ticket"
-	{primaryButtonText}
-	primaryButtonDisabled={!isValid || creating}
+	{modalHeading}
+	primaryButtonText={buttonText}
+	primaryButtonDisabled={!isValid || submitting}
 	on:click:button--primary={handleSubmit}
 	on:close={handleClose}
 	size="lg"
 	class="ticket-modal"
 >
 	<div class="form-container">
-		<!-- Title Section -->
 		<div class="form-section">
 			<TextInput
 				labelText="Title"
@@ -134,7 +145,7 @@
 
 			<div class="form-field">
 				<Dropdown
-					titleText="Initial Status"
+					titleText="Status"
 					selectedId={status}
 					items={statusItems}
 					on:select={(e) => (status = e.detail.selectedId)}
@@ -143,7 +154,6 @@
 			</div>
 		</div>
 
-		<!-- Assignment Section -->
 		<div class="form-section">
 			<Dropdown
 				titleText="Assign To Team Member"
@@ -154,7 +164,6 @@
 			/>
 		</div>
 
-		<!-- Loading and Error States -->
 		{#if error}
 			<div class="status-indicator error">
 				<div class="error-message">
@@ -208,61 +217,6 @@
 		flex-direction: column;
 	}
 
-	/* Custom Footer */
-	.custom-footer {
-		display: flex;
-		justify-content: center;
-		padding: 2rem;
-		width: 100%;
-		border-top: 1px solid #e0e0e0;
-		background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-		margin: 0 -2rem -1.5rem -2rem;
-	}
-
-	.button-content {
-		position: relative;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.75rem;
-		z-index: 2;
-	}
-
-	.btn-icon {
-		transition: transform 0.2s ease;
-	}
-	.btn-text {
-		display: flex;
-		align-items: center;
-		font-weight: 600;
-		letter-spacing: 0.02em;
-	}
-
-	/* Shine Effect */
-	.btn-shine {
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-		transition: left 0.6s ease;
-	}
-
-	:global(.create-btn:hover:not(:disabled)) .btn-shine {
-		left: 100%;
-	}
-
-	/* Loading Spinner */
-	.spinner {
-		width: 18px;
-		height: 18px;
-		border: 2px solid rgba(255, 255, 255, 0.3);
-		border-top: 2px solid #ffffff;
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
-
 	@keyframes spin {
 		0% {
 			transform: rotate(0deg);
@@ -277,12 +231,6 @@
 		padding: 1rem;
 		border-radius: 8px;
 		margin: 0.5rem 0;
-	}
-
-	.status-indicator.loading {
-		background: #f0f7ff;
-		border: 1px solid #d0e2ff;
-		text-align: center;
 	}
 
 	.status-indicator.error {
@@ -354,16 +302,6 @@
 			grid-template-columns: 1fr;
 		}
 
-		.custom-footer {
-			padding: 1.5rem;
-		}
-
-		:global(.create-btn) {
-			min-width: 160px;
-			height: 44px;
-			font-size: 0.9rem;
-		}
-
 		:global(.ticket-modal .bx--modal-container) {
 			max-width: 95vw !important;
 			margin: 1rem;
@@ -387,11 +325,5 @@
 
 	.status-indicator.loading {
 		animation: pulse 2s infinite;
-	}
-
-	/* Focus States */
-	:global(.create-btn:focus) {
-		outline: 2px solid #0f62fe;
-		outline-offset: 2px;
 	}
 </style>

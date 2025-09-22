@@ -1,15 +1,65 @@
-<script>
+<script lang="ts">
 	import { Button, TextInput, Tile, Grid, Row, Column } from 'carbon-components-svelte';
-	// @ts-ignore
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	import CustomButton from '../../lib/components/CustomButton.svelte';
-	// @ts-ignore
 	import { login } from '$lib/stores/auth';
+	import { googleAuth } from '$lib/api/auth'; // Add this import
+	import { user, isAuthenticated } from '$lib/stores/auth'; // Add these
 
 	let username = '';
 	let password = '';
 	let loading = false;
 	let errorMessage = '';
+
+	interface GoogleCredentialResponse {
+		credential: string;
+		select_by: string;
+	}
+
+	onMount(() => {
+		const script = document.createElement('script');
+		script.src = 'https://accounts.google.com/gsi/client';
+		script.onload = initializeGoogleSignIn;
+		document.head.appendChild(script);
+	});
+
+	function initializeGoogleSignIn(): void {
+		if (!window.google) {
+			console.error('Google Sign-In library not loaded');
+			return;
+		}
+
+		window.google.accounts.id.initialize({
+			client_id: '33046009397-91mkm5pdv4febp6pg867p5e90ifichjb.apps.googleusercontent.com', // Replace with your actual client ID
+			callback: handleGoogleResponse
+		});
+
+		// @ts-ignore
+		window.google.accounts.id.renderButton(document.getElementById('google-signin-button'), {
+			theme: 'outline',
+			size: 'large',
+			text: 'signin_with',
+			width: '100%'
+		});
+	}
+
+	async function handleGoogleResponse(response: GoogleCredentialResponse) {
+		try {
+			loading = true;
+			errorMessage = '';
+
+			const result = await googleAuth(response.credential);
+			user.set(result.user);
+			isAuthenticated.set(true);
+			goto('/');
+		} catch (err: unknown) {
+			console.error('Google sign-in error:', err);
+			errorMessage = err instanceof Error ? err.message : 'Google sign-in failed';
+		} finally {
+			loading = false;
+		}
+	}
 
 	async function handleLogin() {
 		if (!username || !password) {
@@ -17,7 +67,10 @@
 			return;
 		}
 
+		loading = true;
 		const result = await login(username, password);
+		loading = false;
+
 		if (result.success) {
 			goto('/');
 		} else {
@@ -37,11 +90,13 @@
 							<h1>Task Tracker</h1>
 							<p>Sign in to your account</p>
 						</div>
+
 						{#if errorMessage}
 							<div class="error-message">
 								{errorMessage}
 							</div>
 						{/if}
+
 						<form on:submit|preventDefault={handleLogin}>
 							<TextInput
 								bind:value={username}
@@ -61,14 +116,18 @@
 								required
 							/>
 							<div style="margin-bottom: 1rem;">
-								<CustomButton type="submit" size="field" variant="default"
-									>{loading ? 'Signing In...' : 'Sign In'}</CustomButton
-								>
+								<CustomButton type="submit" size="field" variant="default" disabled={loading}>
+									{loading ? 'Signing In...' : 'Sign In'}
+								</CustomButton>
 							</div>
 
-							<CustomButton variant="secondary" on:click={() => goto('/register')} size="field"
-								>Register</CustomButton
-							>
+							<CustomButton variant="secondary" on:click={() => goto('/register')} size="field">
+								Register
+							</CustomButton>
+							<div class="or-text">OR</div>
+							<div class="google-signin-section">
+								<div id="google-signin-button"></div>
+							</div>
 						</form>
 					</Tile>
 				</div>
@@ -78,6 +137,7 @@
 </div>
 
 <style>
+	/* Your existing styles */
 	.login-container {
 		min-height: 100vh;
 		display: flex;
@@ -116,6 +176,18 @@
 		margin: 0;
 		color: #525252;
 		font-size: 0.875rem;
+	}
+
+	.or-text {
+		display: flex;
+		justify-content: center;
+		margin: 1rem 0;
+	}
+
+	.google-signin-section {
+		margin-bottom: 1.5rem;
+		display: flex;
+		justify-content: center;
 	}
 
 	/* Mobile-first responsive */

@@ -2,21 +2,22 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { isAuthenticated, logout } from '$lib/stores/auth';
-	
-	// Navigation items
+	import { logout } from '$lib/stores/auth';
+
+	$: currentPath = $page.url.pathname;
+
 	const navItems = [
 		{
 			path: '/',
-			label: 'Dashboard',
+			label: 'Dashboard'
 		},
 		{
 			path: '/tickets',
-			label: 'Tickets',
+			label: 'Tickets'
 		},
 		{
 			path: '/profile',
-			label: 'Profile',
+			label: 'Profile'
 		}
 	];
 
@@ -24,32 +25,25 @@
 		logout();
 		goto('/login');
 	}
-
-	$: currentPath = $page.url.pathname;
 </script>
 
 <aside class="sidebar">
 	<div class="sidebar-header">
 		<h2>TicketFlow</h2>
 	</div>
-	
+
 	<nav class="sidebar-nav">
 		<ul>
 			{#each navItems as item}
 				<li>
-					<a 
-						href={item.path}
-						class="nav-link"
-						class:active={currentPath === item.path}
-					>
-						<span class="nav-icon">{item.icon}</span>
+					<a href={item.path} class="nav-link" class:active={currentPath === item.path}>
 						<span class="nav-label">{item.label}</span>
 					</a>
 				</li>
 			{/each}
 		</ul>
 	</nav>
-	
+
 	<div class="sidebar-footer">
 		<button class="logout-btn" on:click={handleLogout}>
 			<span class="nav-icon">🚪</span>
@@ -63,13 +57,8 @@
 		width: 250px;
 		height: 100vh;
 		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		position: fixed;
-		left: 0;
-		top: 0;
 		display: flex;
 		flex-direction: column;
-		box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
 		z-index: 1000;
 	}
 
@@ -93,11 +82,6 @@
 		padding: 1rem 0;
 	}
 
-	.sidebar-nav ul {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-	}
 
 	.sidebar-nav li {
 		margin: 0.5rem 0;
@@ -168,14 +152,6 @@
 
 	/* Mobile responsiveness */
 	@media (max-width: 768px) {
-		.sidebar {
-			width: 200px;
-			transform: translateX(-100%);
-			transition: transform 0.3s ease;
-		}
 
-		.sidebar.mobile-open {
-			transform: translateX(0);
-		}
 	}
 </style>

@@ -7,6 +7,7 @@
 	import { ArrowLeft, Edit } from 'carbon-icons-svelte';
 
 	import { getTicket, createComment, type Ticket, type Comment } from '$lib/api/tickets';
+	import CustomButton from '$lib/components/CustomButton.svelte';
 
 	let ticket: Ticket | null = null;
 	let newCommentContent = '';
@@ -63,14 +64,6 @@
 <div class="ticket-detail-page">
 	<div class="header">
 		<Button kind="ghost" icon={ArrowLeft} on:click={goBack}>Back to Tickets</Button>
-		{#if ticket}
-			<Button
-				kind="primary"
-				icon={Edit}
-				on:click={goToEdit}
-				style="border-radius: 1rem; max-width: 200px">Edit Ticket</Button
-			>
-		{/if}
 	</div>
 
 	{#if ticket}

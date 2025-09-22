@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-
+import { loginUser, logoutUser, checkAuthStatus, registerUser, googleAuth } from '../api/auth';
 
 interface User {
 	id: number;
@@ -14,12 +14,8 @@ export const isAuthenticated = writable<boolean>(false);
 export const user = writable<User | null>(null);
 export const authLoading = writable<boolean>(true);
 
-
-
-
 export async function checkAuth(): Promise<void> {
 	try {
-		const { checkAuthStatus } = await import('../api/auth');
 		const response = await checkAuthStatus();
 		user.set(response.user);
 		isAuthenticated.set(true);
@@ -31,14 +27,15 @@ export async function checkAuth(): Promise<void> {
 	}
 }
 
-export async function login(username: string, password: string): Promise<{ success: boolean; error?: string }> {
+export async function login(
+	username: string,
+	password: string
+): Promise<{ success: boolean; error?: string }> {
 	try {
-		const { loginUser } = await import('../api/auth');
-		
 		const response = await loginUser(username, password);
 		user.set(response.user);
 		isAuthenticated.set(true);
-		
+
 		return { success: true };
 	} catch (error) {
 		return { success: false, error: (error as Error).message };
@@ -47,7 +44,6 @@ export async function login(username: string, password: string): Promise<{ succe
 
 export async function logout(): Promise<void> {
 	try {
-		const { logoutUser } = await import('../api/auth');
 		await logoutUser();
 		user.set(null);
 		isAuthenticated.set(false);
@@ -58,24 +54,34 @@ export async function logout(): Promise<void> {
 	}
 }
 
-
 export async function register(
-	username: string, 
-	email: string, 
-	password: string, 
-	firstName: string, 
-	lastName: string, 
+	username: string,
+	email: string,
+	password: string,
+	firstName: string,
+	lastName: string,
 	role: string
 ): Promise<{ success: boolean; error?: string }> {
 	try {
-		const { registerUser } = await import('../api/auth');
-		
 		const response = await registerUser(username, email, password, firstName, lastName, role);
+		user.set(response.user);
+		isAuthenticated.set(true);
+
+		return { success: true };
+	} catch (error) {
+		return { success: false, error: (error as Error).message };
+	}
+}
+
+
+
+export async function loginWithGoogle(credential: string): Promise<{ success: boolean; error?: string }> {
+	try {
+		const response = await googleAuth(credential);
 		user.set(response.user);
 		isAuthenticated.set(true);
 		
 		return { success: true };
-		
 	} catch (error) {
 		return { success: false, error: (error as Error).message };
 	}

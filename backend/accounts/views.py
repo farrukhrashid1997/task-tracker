@@ -179,29 +179,37 @@ def profile(request):
     }, status=status.HTTP_200_OK)
     
 
+def verify_google_token(id_token_str):
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            id_token_str,
+            google_requests.Request(),
+            "33046009397-91mkm5pdv4febp6pg867p5e90ifichjb.apps.googleusercontent.com"
+        )
+        return idinfo
+    except Exception as e:
+        print("Invalid token:", e)
+        return None
+
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def google_auth_view(request):
     try:
-        google_access_token = request.data.get('access_token')
-        
+        google_access_token = request.data.get('credential')
         if not google_access_token:
             return Response({
                 'error': 'Google access token is required'
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        google_user_info_url = f"https://www.googleapis.com/oauth2/v2/userinfo?access_token={google_access_token}"
-        response = requests.get(google_user_info_url)
-        
-        if response.status_code != 200:
-            return Response({
-                'error': 'Invalud Google Access token'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        google_id_token = request.data.get('credential')
+        idinfo = verify_google_token(google_id_token)
+        if not idinfo:
+            return Response({'error': 'Invalid Google ID token'}, status=400)
 
-        google_user_data = response.json()
-        email = google_user_data.get('email')
-        first_name = google_user_data.get('given_name', '')
-        last_name = google_user_data.get('id')
+
+        email = idinfo.get('email')
+        first_name = idinfo.get('given_name', '')
+        last_name = idinfo.get('family_name')
         
         try:
             user = User.objects.get(email=email)
@@ -210,7 +218,6 @@ def google_auth_view(request):
             username = email.split('@')[0]
             original_username = username
             counter = 1
-            ## TODO: Give the user an option to choose a username for themselves, for now we will just add a counter in front
             while User.objects.filter(username=username).exists():
                 username = f"{original_username}{counter}"
                 counter += 1
@@ -226,10 +233,8 @@ def google_auth_view(request):
             user.profile.save()
             
         tokens = get_tokens_for_user(user)
-            
-        return Response({
+        response_data = {
             'message': 'Google authentication successful',
-            'tokens': tokens,
             'user': {
                 'id': user.id,
                 'username': user.username,
@@ -238,7 +243,29 @@ def google_auth_view(request):
                 'last_name': user.last_name,
                 'role': user.profile.role,
             }
-        }, status=status.HTTP_200_OK)
+        }
+
+        response = JsonResponse(response_data, status=200)
+
+        response.set_cookie(
+            'access_token',
+            tokens['access'],
+            max_age=60 * 60,
+            httponly=True, 
+            samesite='Strict'
+        )
+
+        response.set_cookie(
+            'refresh_token',
+            tokens['refresh'],
+            max_age=60 * 60 * 24 * 7,
+            httponly=True,
+            samesite='Strict'
+        )
+
+        return response
+            
+
         
     except ImportError:
         return Response({
@@ -252,11 +279,10 @@ def google_auth_view(request):
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
-def logout():
+def logout(request):
     response = JsonResponse({'message': 'Logged out successfully'})
     response.delete_cookie('access_token')
     response.delete_cookie('refresh_token')
-    
     return response
         
 @api_view(['GET'])

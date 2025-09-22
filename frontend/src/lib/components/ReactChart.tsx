@@ -105,9 +105,10 @@ export function PriorityBarChart({ data }: PriorityBarChartProps) {
 						label: 'Tickets',
 						data: values,
 						backgroundColor: [
-							'#dc2626', // Red for high
-							'#ea580c', // Orange for medium
-							'#16a34a' // Green for low
+							'#16a34a', // Red for high
+							'#ea580c',
+							'#dc2626' // Orange for medium
+							// Green for low
 						],
 						borderRadius: 6
 					}
