@@ -12,8 +12,6 @@ interface LoginResponse {
 	};
 }
 
-
-
 interface RegisterResponse {
 	message: string;
 	user: {
@@ -26,18 +24,17 @@ interface RegisterResponse {
 	};
 }
 
-
 export async function loginUser(username: string, password: string): Promise<LoginResponse> {
 	const response = await fetch(`${env.PUBLIC_API_BASE_URL}/auth/login/`, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
 			username: username,
 			password: password
 		}),
-		credentials: 'include' 
+		credentials: 'include'
 	});
 
 	if (!response.ok) {
@@ -60,7 +57,6 @@ export async function checkAuthStatus() {
 	return response.json();
 }
 
-
 export async function logoutUser(): Promise<void> {
 	const response = await fetch(`${env.PUBLIC_API_BASE_URL}/auth/logout/`, {
 		method: 'POST',
@@ -72,19 +68,18 @@ export async function logoutUser(): Promise<void> {
 	}
 }
 
-
 export async function registerUser(
-	username: string, 
-	email: string, 
-	password: string, 
-	firstName: string, 
-	lastName: string, 
+	username: string,
+	email: string,
+	password: string,
+	firstName: string,
+	lastName: string,
 	role: string
 ): Promise<RegisterResponse> {
 	const response = await fetch(`${env.PUBLIC_API_BASE_URL}/auth/register/`, {
 		method: 'POST',
 		headers: {
-			'Content-Type': 'application/json',
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify({
 			username,
@@ -100,6 +95,26 @@ export async function registerUser(
 	if (!response.ok) {
 		const errorData = await response.json();
 		throw new Error(errorData.error || 'Registration failed');
+	}
+
+	return response.json();
+}
+
+export async function googleAuth(credential: string) {
+	const response = await fetch(`${env.PUBLIC_API_BASE_URL}/auth/google-auth/`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			credential: credential
+		})
+	});
+
+	if (!response.ok) {
+		const error = await response.json();
+		throw new Error(error.error || 'Google authentication failed');
 	}
 
 	return response.json();

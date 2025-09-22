@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { loginUser, logoutUser, checkAuthStatus, registerUser } from '../api/auth';
+import { loginUser, logoutUser, checkAuthStatus, registerUser, googleAuth } from '../api/auth';
 
 interface User {
 	id: number;
@@ -67,6 +67,20 @@ export async function register(
 		user.set(response.user);
 		isAuthenticated.set(true);
 
+		return { success: true };
+	} catch (error) {
+		return { success: false, error: (error as Error).message };
+	}
+}
+
+
+
+export async function loginWithGoogle(credential: string): Promise<{ success: boolean; error?: string }> {
+	try {
+		const response = await googleAuth(credential);
+		user.set(response.user);
+		isAuthenticated.set(true);
+		
 		return { success: true };
 	} catch (error) {
 		return { success: false, error: (error as Error).message };
