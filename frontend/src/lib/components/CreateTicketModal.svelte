@@ -1,4 +1,4 @@
-<!-- frontend/src/lib/components/CreateTicketModal.svelte -->
+<!-- Simplified CreateTicketModal.svelte -->
 <script lang="ts">
 	import {
 		Modal,
@@ -7,18 +7,23 @@
 		Dropdown,
 	} from 'carbon-components-svelte';
 
-	import { createTicket, type User, type CreateTicketData } from '$lib/api/tickets';
+	import type { User, CreateTicketData, Ticket } from '$lib/api/tickets';
 
 	export let open = false;
 	export let users: User[] = [];
-	export let onTicketCreated: () => void = () => {};
+	export let modalHeading = 'Create New Ticket';
+	export let primaryButtonText = 'Create Ticket';
+	export let onSubmit: (data: CreateTicketData) => Promise<void>;
+	export let onClose: () => void = () => {};
+	
+	export let initialData: Partial<Ticket> | null = null;
 
 	let title = '';
 	let description = '';
-	let priority = 'Medium';
-	let status = 'Open';
+	let priority = 'medium';
+	let status = 'open';
 	let assignedTo = 'unassigned';
-	let creating = false;
+	let submitting = false;
 	let error = '';
 
 	const priorityItems = [
@@ -41,25 +46,34 @@
 		}))
 	];
 
+	// Pre-fill form when initialData changes
+	$: if (initialData && open) {
+		title = initialData.title || '';
+		description = initialData.description || '';
+		priority = initialData.priority || 'medium';
+		status = initialData.status || 'open';
+		assignedTo = initialData.assigned_to?.id ? initialData.assigned_to.id.toString() : 'unassigned';
+	}
+
 	function resetForm(): void {
 		title = '';
 		description = '';
-		priority = 'Medium';
-		status = 'Open';
+		priority = 'medium';
+		status = 'open';
 		assignedTo = 'unassigned';
-		creating = false;
+		submitting = false;
 		error = '';
 	}
 
 	function handleClose(): void {
-		open = false;
 		resetForm();
+		onClose();
 	}
 
 	async function handleSubmit(): Promise<void> {
 		if (!title.trim() || !description.trim()) return;
 
-		creating = true;
+		submitting = true;
 		error = '';
 
 		try {
@@ -71,24 +85,23 @@
 				assigned_to_id: assignedTo !== 'unassigned' ? parseInt(assignedTo) : null
 			};
 
-			await createTicket(ticketData);
+			await onSubmit(ticketData);
 			handleClose();
-			onTicketCreated();
 		} catch (err) {
-			error = 'Failed to create ticket. Please try again.';
-			creating = false;
+			error = 'Failed to save ticket. Please try again.';
+			submitting = false;
 		}
 	}
-	$: isValid = title.trim() && description.trim();
-	$: primaryButtonText = creating ? '' : 'Create Ticket';
 
+	$: isValid = title.trim() && description.trim();
+	$: buttonText = submitting ? '' : primaryButtonText;
 </script>
 
 <Modal
 	bind:open
-	modalHeading="Create New Ticket"
-	{primaryButtonText}
-	primaryButtonDisabled={!isValid || creating}
+	{modalHeading}
+	primaryButtonText={buttonText}
+	primaryButtonDisabled={!isValid || submitting}
 	on:click:button--primary={handleSubmit}
 	on:close={handleClose}
 	size="lg"
@@ -132,7 +145,7 @@
 
 			<div class="form-field">
 				<Dropdown
-					titleText="Initial Status"
+					titleText="Status"
 					selectedId={status}
 					items={statusItems}
 					on:select={(e) => (status = e.detail.selectedId)}
@@ -204,9 +217,6 @@
 		flex-direction: column;
 	}
 
-	/* Custom Footer */
-	
-
 	@keyframes spin {
 		0% {
 			transform: rotate(0deg);
@@ -222,7 +232,6 @@
 		border-radius: 8px;
 		margin: 0.5rem 0;
 	}
-
 
 	.status-indicator.error {
 		background: #fff1f1;
@@ -293,16 +302,6 @@
 			grid-template-columns: 1fr;
 		}
 
-		.custom-footer {
-			padding: 1.5rem;
-		}
-
-		:global(.create-btn) {
-			min-width: 160px;
-			height: 44px;
-			font-size: 0.9rem;
-		}
-
 		:global(.ticket-modal .bx--modal-container) {
 			max-width: 95vw !important;
 			margin: 1rem;
@@ -326,11 +325,5 @@
 
 	.status-indicator.loading {
 		animation: pulse 2s infinite;
-	}
-
-	/* Focus States */
-	:global(.create-btn:focus) {
-		outline: 2px solid #0f62fe;
-		outline-offset: 2px;
 	}
 </style>

@@ -9,7 +9,9 @@
 		getUsers,
 		updateTicket,
 		type Ticket,
-		type User
+		type User,
+		type CreateTicketData,
+		createTicket
 	} from '$lib/api/tickets';
 	import TicketCard from '$lib/components/TicketCard.svelte';
 	import CreateTicketModal from '$lib/components/CreateTicketModal.svelte';
@@ -17,27 +19,67 @@
 
 	let tickets: Ticket[] = [];
 	let users: User[] = [];
+	let showModal = false;
+	let editingTicket: Ticket | null = null;
 	let showCreateModal = false;
+	$: modalConfig = editingTicket
+		? {
+				heading: 'Edit Ticket',
+				buttonText: 'Update Ticket',
+				initialData: editingTicket,
+				onSubmit: handleUpdateTicket
+			}
+		: {
+				heading: 'Create New Ticket',
+				buttonText: 'Create Ticket',
+				initialData: null,
+				onSubmit: handleCreateTicket
+			};
 
 	onMount(async (): Promise<void> => {
-		const resp = await getTickets();
-		tickets = resp.results;
-		const respUsers = await getUsers();
-		users = respUsers.results;
+		await loadData();
 	});
+
+	async function loadData(): Promise<void> {
+		const [ticketsResp, usersResp] = await Promise.all([getTickets(), getUsers()]);
+		tickets = ticketsResp.results;
+		users = usersResp.results;
+	}
+
+	function closeModal(): void {
+		showModal = false;
+		editingTicket = null;
+	}
 
 	function handleViewTicket(ticket: Ticket): void {
 		goto(`/tickets/${ticket.id}`);
 	}
 
 	function handleEditTicket(ticket: Ticket): void {
-		console.log('print ticket');
+		editingTicket = ticket;
+		showModal = true;
 	}
 
 	async function handleDeleteTicket(ticket: Ticket): Promise<void> {
 		await deleteTicket(ticket.id);
 		const resp = await getTickets();
 		tickets = resp.results;
+	}
+
+	async function handleCreateTicket(data: CreateTicketData): Promise<void> {
+		await createTicket(data);
+		await loadData();
+	}
+
+	function openCreateModal(): void {
+		editingTicket = null;
+		showModal = true;
+	}
+
+	async function handleUpdateTicket(data: CreateTicketData): Promise<void> {
+		if (!editingTicket) return;
+		await updateTicket(editingTicket.id, data);
+		await loadData();
 	}
 
 	async function handleAssignTicket(ticket: Ticket, userId: number | null): Promise<void> {
@@ -57,12 +99,7 @@
 	<div class="header">
 		<h1>Tickets</h1>
 		<div>
-			<CustomButton
-				type="button"
-				variant="default"
-				on:click={() => {
-					showCreateModal = true;
-				}}>Create Ticket</CustomButton
+			<CustomButton type="button" variant="default" on:click={openCreateModal}>Create Ticket</CustomButton
 			>
 		</div>
 	</div>
@@ -86,13 +123,13 @@
 </div>
 
 <CreateTicketModal
-	bind:open={showCreateModal}
+	bind:open={showModal}
 	{users}
-	onTicketCreated={async () => {
-		showCreateModal = false;
-		const resp = await getTickets();
-		tickets = resp.results;
-	}}
+	modalHeading={modalConfig.heading}
+	primaryButtonText={modalConfig.buttonText}
+	initialData={modalConfig.initialData}
+	onSubmit={modalConfig.onSubmit}
+	onClose={closeModal}
 />
 
 <style>

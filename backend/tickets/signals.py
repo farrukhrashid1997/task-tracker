@@ -26,9 +26,7 @@ def handle_ticket_assignment(sender, instance, created, **kwargs):
             if instance.assigned_to:
                 send_ticket_assignment.delay(instance.id, instance.assigned_to.id)
             
-            cache.delete('dashboard_summary')
-            cache.delete('ticket_status_stats')
-            cache.delete('ticket_priority_stats')
+            clear_dashboard_cache()
             
         else:
             old_assigned_to_id = getattr(instance, '_old_assigned_to_id', None)
@@ -36,7 +34,7 @@ def handle_ticket_assignment(sender, instance, created, **kwargs):
             
             if old_assigned_to_id != current_assigned_to_id and current_assigned_to_id:
                 send_ticket_assignment.delay(instance.id, current_assigned_to_id)
-                cache.delete('dashboard_summary')
+                clear_dashboard_cache()
     
     except Exception as e:
         logger.error(f"Error in ticket assignment signal for ticket {instance.id}: {str(e)}")

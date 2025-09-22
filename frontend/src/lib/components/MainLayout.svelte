@@ -9,9 +9,8 @@
 	}
 
 	let sidebarOpen = $state(false);
-	let currentPath = $state($page.url.pathname);
 
-	let showSidebar = $derived(!['/login', '/register'].includes(currentPath));
+	let showSidebar = $derived(!['/login', '/register'].includes($page.url.pathname));
 	let { children }: Props = $props();
 
 	function toggleSidebar() {
@@ -35,7 +34,7 @@
 
 		<div class="sidebar-wrapper" class:mobile-open={sidebarOpen}>
 			<Sidebar />
-		</div>
+		</div> 
 
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore event_directive_deprecated -->
@@ -51,7 +50,6 @@
 		</main>
 	</div>
 {:else}
-	<!-- Login/Register pages without sidebar -->
 	<main class="auth-main">
 		{@render children()}
 	</main>
