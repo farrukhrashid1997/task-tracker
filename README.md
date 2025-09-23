@@ -55,6 +55,7 @@ A full-stack ticket management application built with Svelte frontend and Django
 3. **Start Frontend Development Server**
    ```bash
    cd frontend
+   nvm use 22
    npm install
    npm run dev
    ```
