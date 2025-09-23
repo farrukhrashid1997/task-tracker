@@ -32,7 +32,7 @@ A full-stack ticket management application built with Svelte frontend and Django
       minikube start
       kubectl apply -f kubernetes/ -R
       kubectl wait --for=condition=ready pod -l app=django --timeout=300s
-      kubectl exec -l app=django -- python manage.py migrate
+      kubectl exec deployment/django-deployment -- python manage.py migrate
       kubectl port-forward service/django-service 8000:8000
    ```
 
