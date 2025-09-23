@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery
+  template:
+    metadata:
+      labels:
+        app: celery
+    spec:
+      containers:
+      - name: celery
+        image: django-ticket-app:latest
+        imagePullPolicy: Never
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://ticket_user:ticket_pass@postgres-service:5432/ticket_system"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: CELERY_BROKER_URL
+          value: "amqp://ticket_user:ticket_pass@rabbitmq-service:5672//"
+        command: ["celery"]
+        args: ["-A", "ticket_system", "worker", "--loglevel=info"]

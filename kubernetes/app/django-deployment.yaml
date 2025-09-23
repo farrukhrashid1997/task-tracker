@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: django-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: django
+  template:
+    metadata:
+      labels:
+        app: django
+    spec:
+      containers:
+      - name: django
+        image: django-ticket-app:latest
+        imagePullPolicy: Never
+        env:
+        - name: DATABASE_URL
+          value: "postgresql://ticket_user:ticket_pass@postgres-service:5432/ticket_system"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379/0"
+        - name: CELERY_BROKER_URL
+          value: "amqp://ticket_user:ticket_pass@rabbitmq-service:5672//"
+        ports:
+        - containerPort: 8000
