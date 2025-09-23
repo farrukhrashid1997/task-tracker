@@ -27,37 +27,22 @@ A full-stack ticket management application built with Svelte frontend and Django
    cd ticket-management-system
    ```
 
-2. **Start Backend Services**
-   ```bash
-   # Start all backend services (PostgreSQL, Redis, RabbitMQ, Django, Celery)
-   docker compose up --build
-   ```
+2. **Kubernetes Setup**
+```bash
+   minikube start
+   kubectl apply -f kubernetes/ -R
+   kubectl wait --for=condition=ready pod -l app=django --timeout=300s
+   kubectl exec -l app=django -- python manage.py migrate
+   kubectl port-forward service/django-service 8000:8000
+```
 
-3. **Run Database Setup**
-   ```bash
-   # Run migrations to create database tables
-   docker compose exec django python manage.py migrate
-   ```
-
-4. **Load Sample Data (Optional)**
-   ```bash
-   # Load test data for development
-   docker compose exec django python manage.py create_sample_data
-   ```
-
-5. **Start Frontend Development Server**
+3. **Start Frontend Development Server**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
 
-### Access Points
-
-- **Frontend Application**: http://localhost:5173
-- **Django API**: http://localhost:8000
-- **Django Admin**: http://localhost:8000/admin
-- **RabbitMQ Management**: http://localhost:15672 (user: `ticket_user`, pass: `ticket_pass`)
 
 ### Core Functionality
 - User authentication with JWT cookies
@@ -74,34 +59,6 @@ A full-stack ticket management application built with Svelte frontend and Django
 - Type-safe APIs with TypeScript
 - Docker containerization
 
-## Known Issues & Improvements Needed
-
-### Critical Fixes Required
-1. **Sidebar hamburger menu** - Mobile menu button not working properly
-2. **Missing API endpoints**:
-   - Tickets over time data for line chart
-   - Dropdown data API (users, priorities, statuses)
-
-### Code Quality Improvements
-1. **Add Django serializers** for tickets and accounts modules:
-   - Automatic data validation
-   - Reduced repetitive code
-   - Better API consistency
-
-2. **UI/UX improvements**:
-   - Unify button styles across the application
-   - Improve mobile responsiveness
-   - Better error handling in frontend
-
-### Missing Submission Requirements
-1. **Testing**:
-   - Unit tests for API endpoints
-   - Frontend component tests
-   - Celery task tests
-
-2. **CI/CD Pipeline**:
-   - Automated testing on commits
-   - SAST/DAST security scanning
 
 ## Project Structure
 ```
@@ -125,11 +82,6 @@ ticket-management-system/
 - **RabbitMQ**: ticket_user / ticket_pass
 - **Database**: ticket_user / ticket_pass / ticket_system
 
-## Next Steps for Completion
 
-1. Fix mobile hamburger menu
-2. Implement missing API endpoints
-3. Add Django serializers
-4. Write comprehensive tests
 
 
