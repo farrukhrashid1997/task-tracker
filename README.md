@@ -29,10 +29,26 @@ A full-stack ticket management application built with Svelte frontend and Django
 
 2. **Kubernetes Setup**
    ```bash
+      # Start minikube cluster
       minikube start
+      
+      # Configure Docker to use minikube's registry
+      eval $(minikube docker-env)
+      
+      # Build the Django application image
+      docker build -t django-ticket-app ./backend
+      
+      # Deploy all services (PostgreSQL, Redis, RabbitMQ, Django, Celery)
       kubectl apply -f kubernetes/ -R
+      
+      # Wait for Django pod to be ready
       kubectl wait --for=condition=ready pod -l app=django --timeout=300s
+      
+      # Run database migrations
       kubectl exec deployment/django-deployment -- python manage.py migrate
+      
+      # Forward Django service to localhost (keep this terminal open)
+      # We'd use Ingress in production though.
       kubectl port-forward service/django-service 8000:8000
    ```
 
