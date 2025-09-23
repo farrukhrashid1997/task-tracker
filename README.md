@@ -17,7 +17,7 @@ A full-stack ticket management application built with Svelte frontend and Django
 ### Prerequisites
 - Docker and Docker Compose installed
 - Git installed
-- Node.js 18+ (for frontend development)
+- Node.js 22+ (for frontend development)
 
 ### Installation Steps
 
